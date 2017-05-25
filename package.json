@@ -1,0 +1,20 @@
+{
+  "name": "eth",
+  "version": "1.0.0",
+  "description": "a node CLI app for displaying the current bitcoin and eth values",
+  "main": "index.js",
+  "dependencies": {
+    "cli-table": "^0.3.1",
+    "colors": "^1.1.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "bitcoin",
+    "etherum"
+  ],
+  "author": "Deac Karns",
+  "license": "ISC"
+}
