@@ -2,7 +2,7 @@
 
 ### Install
 ```
-npm install ethreal
+npm install ethreal -g
 ```
 
 ### Useage
