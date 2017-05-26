@@ -1,8 +1,11 @@
 {
   "name": "ethreal",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "a node CLI app for displaying the current bitcoin and eth values",
   "main": "ethreal",
+  "bin": {
+    "ethreal": "./ethreal"
+  },
   "dependencies": {
     "cli-table": "^0.3.1"
   },
@@ -19,5 +22,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/peledies/ethreal.git"
-  }
+  },
+  "homepage": "https://github.com/peledies/ethreal.git",
 }
