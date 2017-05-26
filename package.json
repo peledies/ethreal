@@ -1,6 +1,6 @@
 {
   "name": "ethreal",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "a node CLI app for displaying the current bitcoin and eth values",
   "main": "index.js",
   "dependencies": {
