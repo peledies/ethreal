@@ -1,11 +1,10 @@
 {
-  "name": "eth",
-  "version": "1.0.0",
+  "name": "ethreal",
+  "version": "1.0.1",
   "description": "a node CLI app for displaying the current bitcoin and eth values",
   "main": "index.js",
   "dependencies": {
-    "cli-table": "^0.3.1",
-    "colors": "^1.1.2"
+    "cli-table": "^0.3.1"
   },
   "devDependencies": {},
   "scripts": {
@@ -16,5 +15,9 @@
     "etherum"
   ],
   "author": "Deac Karns",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peledies/ethreal.git"
+  }
 }
