@@ -25,31 +25,38 @@ const httpromise = function(url) {
 };
 
 const loadTable = function(data){
-  var parsed = JSON.parse(data);
+  var parsed = JSON.parse(data).shift();
 
-  var change = (parsed.change >= 0)
-        ? colors.green(' '+parsed.change)
-        : colors.red(parsed.change);
+  var change24h = (parsed.percent_change_24h >= 0)
+        ? colors.green(' '+parsed.percent_change_24h)
+        : colors.red(parsed.percent_change_24h);
 
-  var c = (parsed.symbol == 'eth')? 'cyan':'magenta'
+  var change7d = (parsed.percent_change_7d >= 0)
+        ? colors.green(' '+parsed.percent_change_7d)
+        : colors.red(parsed.percent_change_7d);
+
+  var c = (parsed.symbol == 'ETH')? 'cyan':'magenta'
 
   table.push(
-      [colors[c](parsed.name), colors[c](parsed.price.usd), change]
+      [colors[c](parsed.name), colors[c]("$"+parsed.price_usd), change24h, change7d]
   );
 
 }
 
 var table = new Table({
+  head: ['Crypto', 'USD', '24h', '7d'],
   chars: { 'top': '═' , 'top-mid': '╤' , 'top-left': '╔' , 'top-right': '╗'
          , 'bottom': '═' , 'bottom-mid': '╧' , 'bottom-left': '╚' , 'bottom-right': '╝'
          , 'left': '║' , 'left-mid': '╟' , 'mid': '─' , 'mid-mid': '┼'
          , 'right': '║' , 'right-mid': '╢' , 'middle': '│' }
 });
 
-httpromise('http://coinmarketcap-nexuist.rhcloud.com/api/btc')
+
+
+httpromise('https://api.coinmarketcap.com/v1/ticker/bitcoin/')
   .then((data) => loadTable(data))
   .then(function(){
-    httpromise('http://coinmarketcap-nexuist.rhcloud.com/api/eth')
+    httpromise('https://api.coinmarketcap.com/v1/ticker/ethereum/')
       .then((data) => loadTable(data))
       .then(function(){
         console.log(table.toString());
