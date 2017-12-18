@@ -35,12 +35,25 @@ const loadTable = function(data){
         ? colors.green(' '+parsed.percent_change_7d)
         : colors.red(parsed.percent_change_7d);
 
-  var c = (parsed.symbol == 'ETH')? 'cyan':'magenta'
+  switch(parsed.symbol) {
+      case 'ETH':
+          var c = 'cyan';
+          break;
+      case 'BTC':
+          var c = 'magenta';
+          break;
+      case 'LTC':
+          var c = 'yellow';
+          break;
+      default:
+          var c = 'cyan';
+  }
 
   table.push(
       [colors[c](parsed.name), colors[c]("$"+parsed.price_usd), change24h, change7d]
   );
 
+  return table;
 }
 
 var table = new Table({
@@ -55,10 +68,14 @@ var table = new Table({
 
 httpromise('https://api.coinmarketcap.com/v1/ticker/bitcoin/')
   .then((data) => loadTable(data))
-  .then(function(){
-    httpromise('https://api.coinmarketcap.com/v1/ticker/ethereum/')
+  .then(function(table){
+    return httpromise('https://api.coinmarketcap.com/v1/ticker/ethereum/')
       .then((data) => loadTable(data))
-      .then(function(){
-        console.log(table.toString());
-      })
+  })
+  .then(function(table){
+    return httpromise('https://api.coinmarketcap.com/v1/ticker/litecoin/')
+      .then((data) => loadTable(data))
+  })
+  .then(function(t){
+    console.log(t.toString());
   });
