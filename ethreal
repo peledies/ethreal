@@ -1,6 +1,34 @@
 #!/usr/bin/env node
 var colors = require('colors');
 var Table = require('cli-table');
+var fs = require('fs');
+
+var home = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+
+if (fs.existsSync(home+'/.ethreal')) {
+  var config = JSON.parse(fs.readFileSync(home+'/.ethreal', 'utf8'));
+}else{
+  var config = {
+    "crypto": [
+      {
+          "symbol": "BTC"
+        , "color": "magenta"
+      },
+      {
+          "symbol": "BCH"
+        , "color": "green"
+      },
+      {
+          "symbol": "ETH"
+        , "color": "cyan"
+      },
+      {
+          "symbol": "LTC"
+        , "color": "yellow"
+      }
+    ]
+  };
+}
 
 const httpromise = function(url) {
   // return new pending promise
@@ -24,8 +52,7 @@ const httpromise = function(url) {
     })
 };
 
-const loadTable = function(data){
-  var parsed = JSON.parse(data).shift();
+const loadTable = function(parsed){
 
   var change24h = (parsed.percent_change_24h >= 0)
         ? colors.green(' '+parsed.percent_change_24h)
@@ -35,25 +62,24 @@ const loadTable = function(data){
         ? colors.green(' '+parsed.percent_change_7d)
         : colors.red(parsed.percent_change_7d);
 
-  switch(parsed.symbol) {
-      case 'ETH':
-          var c = 'cyan';
-          break;
-      case 'BTC':
-          var c = 'magenta';
-          break;
-      case 'LTC':
-          var c = 'yellow';
-          break;
-      default:
-          var c = 'cyan';
-  }
+
+  var color = config.crypto.filter(function(c){
+    return c.symbol == parsed.symbol;
+  });
+
+  var c = color[0].color;
 
   table.push(
       [colors[c](parsed.name), colors[c]("$"+parsed.price_usd), change24h, change7d]
   );
 
   return table;
+}
+
+const configSymbols = function() {
+  return config.crypto.map(function(c){
+    return c.symbol;
+  });
 }
 
 var table = new Table({
@@ -64,17 +90,23 @@ var table = new Table({
          , 'right': '║' , 'right-mid': '╢' , 'middle': '│' }
 });
 
+httpromise('https://api.coinmarketcap.com/v1/ticker/')
+  .then(function(data){
+    data = JSON.parse(data);
+    symbols = configSymbols();
 
+    var sort = data.filter(function(c) {
+      return symbols.indexOf(c.symbol) >= 0;
+    });
 
-httpromise('https://api.coinmarketcap.com/v1/ticker/bitcoin/')
-  .then((data) => loadTable(data))
-  .then(function(table){
-    return httpromise('https://api.coinmarketcap.com/v1/ticker/ethereum/')
-      .then((data) => loadTable(data))
+    return sort;
   })
-  .then(function(table){
-    return httpromise('https://api.coinmarketcap.com/v1/ticker/litecoin/')
-      .then((data) => loadTable(data))
+  .then(function(data){
+    var table = null;
+    data.forEach(function(c){
+      table = loadTable(c);
+    });
+    return table;
   })
   .then(function(t){
     console.log(t.toString());
