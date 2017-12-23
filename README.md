@@ -1,4 +1,14 @@
 # EthReal
+A command line utility that will display the current market values of the Cryptocurrencies you care most about right in your terminal. EthReal utilizes data from the [coinmarketcap.com](https://coinmarketcap.com) top 100.
+
+- [Install](#install)
+- [Useage](#useage)
+- [Configuration](#configuration)
+- [Following a Cryptocurrency](#following-a-cryptocurrency)
+- [Colors](#colors)
+- [Options](#options)
+- [Supported Cryptocurrencies](#supported-cryptocurrencies)
+
 
 ### Install
 ```
@@ -12,159 +22,74 @@ ethreal
 
 ### Output
 ```
-╔══════════╤══════════╤═══════╤════════╗
-║ Crypto   │ USD      │ 24h   │ 7d     ║
-╟──────────┼──────────┼───────┼────────╢
-║ Bitcoin  │ $18828.0 │ -2.94 │  11.98 ║
-╟──────────┼──────────┼───────┼────────╢
-║ Ethereum │ $740.959 │  3.64 │  56.57 ║
-╟──────────┼──────────┼───────┼────────╢
-║ Litecoin │ $319.694 │  0.01 │  71.96 ║
-╚══════════╧══════════╧═══════╧════════╝
+╔══════════════╤══════════╤════════╤════════╤═══════════╤══════════╗
+║ Crypto       │ USD      │ 24h    │ 7d     │ Holding   │ USD      ║
+╟──────────────┼──────────┼────────┼────────┼───────────┼──────────╢
+║ Bitcoin      │ $15477.3 │  8.5   │ -19.49 │ -         │ -        ║
+╟──────────────┼──────────┼────────┼────────┼───────────┼──────────╢
+║ Ethereum     │ $759.211 │  9.31  │  9.0   │ 2         │ $1518.42 ║
+╟──────────────┼──────────┼────────┼────────┼───────────┼──────────╢
+║ Bitcoin Cash │ $3448.4  │  19.08 │  90.88 │ 1         │ $3448.40 ║
+╟──────────────┼──────────┼────────┼────────┼───────────┼──────────╢
+║ Litecoin     │ $304.587 │  9.87  │  0.93  │ 0.1194417 │ $36.38   ║
+╚══════════════╧══════════╧════════╧════════╧═══════════╧══════════╝
 ```
 
-### Configuration (Optional)
+### Configuration
+All the configuration data is stored in a `json` file in your home directory `~/.ethreal`
 
-By default EthReal will display `BTC`, `ETH`, `BCH`, `LTC`. By adding a configuration file (`.ethreal`) to your users home directory, you can specify which [Supported Cryptocurriencies](#supported-cryptocurriencies) to display and the rows color style.
+### Holdings
+You can now calculate the value of your holdings automatically with EthReal. Holdings data is stored in the configuration file `~/.ethreal` as a type float. No private data is saved or stored, just a number.
 
-#### Sample `.ethreal` config file
+##### Add Holdings
+Example adding `0.001234` to your bitcoin holdings
 ```
-{
-    "crypto": [
-      {
-          "symbol": "BTC"
-        , "color": "magenta"
-      },
-      {
-          "symbol": "BCH"
-        , "color": "green"
-      },
-      {
-          "symbol": "ETH"
-        , "color": "cyan"
-      },
-      {
-          "symbol": "LTC"
-        , "color": "yellow"
-      }
-    ]
-  }
+ethreal -a 0.001234 -s btc
 ```
 
-### Available colors 
-black, red, green, yellow, blue, magenta, cyan, white, gray, grey
+##### Remove Holdings
+Example removing `0.001234` from your bitcoin holdings
+```
+ethreal -r 0.001234 -s btc
+```
 
-### Background colors
-bgBlack, bgRed, bgGreen, bgYellow, bgBlue, bgMagenta, bgCyan, bgWhite
+### Following a Cryptocurrency
 
-### Styles
-reset, bold, dim, italic, underline, inverse, hidden, strikethrough
+###### Follow
+Example, start following Bytecoin. the color option is optional. `red` will be used by default 
+```
+ethreal -f bcn -c yellow
+```
 
-### Extras
+###### Un-follow
+Example, stop following Bytecoin
+```
+ethreal -u bcn
+```
+
+
+### Colors
+
+Changing the color of a cryptocurrency row is easy.
+```
+ethreal -s btc -c blue
+```
+
+
+##### Available colors 
+black, red, green, yellow, blue, magenta, cyan, white, gray, grey,
+bgBlack, bgRed, bgGreen, bgYellow, bgBlue, bgMagenta, bgCyan, bgWhite,
+reset, bold, dim, italic, underline, inverse, hidden, strikethrough,
 rainbow, zebra, america, trap, random
 
-### Supported Cryptocurriencies
 
-EthReal is currently able to display the current market value in USD for the folowing:
+### Additional Options
+
 ```
-- Bitcoin (BTC)
-- Ethereum (ETH)
-- Bitcoin Cash (BCH)
-- Ripple (XRP)
-- Litecoin (LTC)
-- IOTA (MIOTA)
-- Cardano (ADA)
-- Dash (DASH)
-- NEM (XEM)
-- Bitcoin Gold (BTG)
-- Monero (XMR)
-- EOS (EOS)
-- Qtum (QTUM)
-- NEO (NEO)
-- Stellar (XLM)
-- Ethereum Classic (ETC)
-- TRON (TRX)
-- Lisk (LSK)
-- BitConnect (BCC)
-- Zcash (ZEC)
-- Verge (XVG)
-- OmiseGO (OMG)
-- Populous (PPT)
-- BitShares (BTS)
-- Waves (WAVES)
-- Hshare (HSR)
-- Stratis (STRAT)
-- Ardor (ARDR)
-- Tether (USDT)
-- Komodo (KMD)
-- Nxt (NXT)
-- Bytecoin (BCN)
-- Steem (STEEM)
-- Augur (REP)
-- Dogecoin (DOGE)
-- MonaCoin (MONA)
-- Ark (ARK)
-- Veritaseum (VERI)
-- Siacoin (SC)
-- RaiBlocks (XRB)
-- Status (SNT)
-- Decred (DCR)
-- PIVX (PIVX)
-- Golem (GNT)
-- Binance Coin (BNB)
-- Electroneum (ETN)
-- SALT (SALT)
-- DigiByte (DGB)
-- Byteball Bytes (GBYTE)
-- VeChain (VET)
-- Power Ledger (POWR)
-- Bytom (BTM)
-- Walton (WTC)
-- Basic Attention Token (BAT)
-- TenX (PAY)
-- Vertcoin (VTC)
-- MaidSafeCoin (MAID)
-- Factom (FCT)
-- DigixDAO (DGD)
-- ZCoin (XZC)
-- Kyber Network (KNC)
-- Aeternity (AE)
-- Syscoin (SYS)
-- QASH (QASH)
-- BitcoinDark (BTCD)
-- 0x (ZRX)
-- ReddCoin (RDD)
-- Gas (GAS)
-- Einsteinium (EMC2)
-- BitBay (BAY)
-- GameCredits (GAME)
-- FunFair (FUN)
-- Decentraland (MANA)
-- Santiment Network Token (SAN)
-- GXShares (GXS)
-- Aion (AION)
-- Iconomi (ICN)
-- Civic (CVC)
-- Cryptonex (CNX)
-- Dragonchain (DRGN)
-- Ethos (ETHOS)
-- Gnosis (GNO)
-- Nexus (NXS)
-- Monaco (MCO)
-- Metal (MTL)
-- Raiden Network Token (RDN)
-- Bancor (BNT)
-- Request Network (REQ)
-- Storj (STORJ)
-- Blocknet (BLOCK)
-- NAV Coin (NAV)
-- Streamr DATAcoin (DATA)
-- PayPie (PPP)
-- ChainLink (LINK)
-- RChain (RHOC)
-- Groestlcoin (GRS)
-- Ubiq (UBQ)
-- Substratum (SUB)
-- Asch (XAS)
-- Edgeless (EDG)
+ethreal -h
 ```
+
+
+### Supported Cryptocurrencies
+
+EthReal is currently able to display the current market value in USD for the [coinmarketcap.com](https://coinmarketcap.com) top 100:
