@@ -6,7 +6,7 @@ var program = require('commander');
 var home = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
 
 program
-  .version('1.2.0')
+  .version('1.2.1')
   .option('-f, --follow <symbol>', 'Follow a cryptocurrency', 0)
   .option('-u, --unfollow <symbol>', 'Stop following a cryptocurrency', 0)
   .option('-c, --color <color>', 'Change color of cryptocurrency', 0)
@@ -73,32 +73,32 @@ if (program.unfollow){
 // follow a crypto
 if (program.follow){
 
-  httpromise('https://api.coinmarketcap.com/v1/ticker/')
+/*  httpromise('https://api.coinmarketcap.com/v1/ticker/')
     .then(function(data){
       data = JSON.parse(data);
       var list = data.map(function(c) {
         return c.symbol;
       });
       return list;
-    }).then(function(data){
+    }).then(function(data){*/
       var symbol = program.follow.toUpperCase();
       var color = (program.color)? program.color : 'red';
 
-      if(data.indexOf(symbol) < 0 ){
+/*    if(data.indexOf(symbol) < 0 ){
         console.log(colors.red('Symbol '+symbol+' not supported.'));
         console.log(colors.cyan('Supported Symbols'));
         console.log(data.sort().join(', '));
         process.exit(1);
-      }
+      }*/
 
       if(!symbolInConfig(symbol)){
         var data = loadConfig();
         data.crypto.push({'symbol':symbol, 'color': color});
-        //writeToConfig(data);
+        writeToConfig(data);
       }else{
         console.log("Already following "+symbol);
       }
-    })
+    //})
 
 }
 
