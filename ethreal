@@ -124,7 +124,7 @@ if (program.add){
     });
     writeToConfig(data);
   }
-  
+
   console.log("Added "+program.add+" to "+symbol+" holdings");
 }
 
@@ -146,7 +146,7 @@ if (program.remove){
     });
     writeToConfig(data);
   }
-  
+
   console.log("Removed "+program.remove+" from "+symbol+" holdings");
 }
 
@@ -164,7 +164,7 @@ if (program.color && program.symbol){
     });
     writeToConfig(data);
   }
-  
+
   console.log(colors[program.color](symbol)+" color updated.");
 }
 
@@ -195,6 +195,21 @@ if (!fs.existsSync(home+'/.ethreal')) {
 
 var config = JSON.parse(fs.readFileSync(home+'/.ethreal', 'utf8'));
 
+let HoldingValue = {
+    value: null,
+
+    add: function(value){
+        this.value += value;
+        return this;
+    },
+
+    total: function(){
+        return this.value.toFixed(2);
+    }
+
+
+}
+
 const loadTable = function(parsed){
 
   var change24h = (parsed.percent_change_24h >= 0)
@@ -219,6 +234,8 @@ const loadTable = function(parsed){
 
   var v = h*parsed.price_usd;
       v = (v > 0)? "$"+v.toFixed(2) : "-";
+
+  HoldingValue.add(h*parsed.price_usd);
 
   var c = color[0].color;
 
@@ -263,4 +280,5 @@ httpromise('https://api.coinmarketcap.com/v1/ticker/')
   })
   .then(function(t){
     console.log(t.toString());
+    console.log('Total Portfolio Value: $'+HoldingValue.total())
   });
