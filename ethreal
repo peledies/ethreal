@@ -276,9 +276,11 @@ httpromise('https://api.coinmarketcap.com/v1/ticker/')
     data.forEach(function(c){
       table = loadTable(c);
     });
+    table.push(
+      ['', '', '', '', colors.bold('Total'), colors.bold('$'+HoldingValue.total())]
+    );
     return table;
   })
   .then(function(t){
     console.log(t.toString());
-    console.log('Total Portfolio Value: $'+HoldingValue.total())
   });
