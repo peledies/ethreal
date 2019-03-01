@@ -13,6 +13,7 @@ program
   .option('-s, --symbol <symbol>', 'Specify symbol of cryptocurrency to modify', 0)
   .option('-a, --add <holdings>', 'Specify holdings to add to symbol (-s <symbol> required)', parseFloat)
   .option('-r, --remove <holdings>', 'Specify holdings to remove from symbol (-s <symbol> required)', parseFloat)
+  .option('-t, --total', 'Display the holdings totals', 0)
   .parse(process.argv);
 
 const httpromise = function(url) {
@@ -124,7 +125,7 @@ if (program.add){
     });
     writeToConfig(data);
   }
-  
+
   console.log("Added "+program.add+" to "+symbol+" holdings");
 }
 
@@ -146,7 +147,7 @@ if (program.remove){
     });
     writeToConfig(data);
   }
-  
+
   console.log("Removed "+program.remove+" from "+symbol+" holdings");
 }
 
@@ -164,7 +165,7 @@ if (program.color && program.symbol){
     });
     writeToConfig(data);
   }
-  
+
   console.log(colors[program.color](symbol)+" color updated.");
 }
 
@@ -195,6 +196,19 @@ if (!fs.existsSync(home+'/.ethreal')) {
 
 var config = JSON.parse(fs.readFileSync(home+'/.ethreal', 'utf8'));
 
+let HoldingValue = {
+    value: null,
+
+    add: function(value){
+        this.value += value;
+        return this;
+    },
+
+    total: function(){
+        return this.value.toFixed(2);
+    }
+}
+
 const loadTable = function(parsed){
 
   var change24h = (parsed.percent_change_24h >= 0)
@@ -219,6 +233,8 @@ const loadTable = function(parsed){
 
   var v = h*parsed.price_usd;
       v = (v > 0)? "$"+v.toFixed(2) : "-";
+
+  HoldingValue.add(h*parsed.price_usd);
 
   var c = color[0].color;
 
@@ -259,8 +275,16 @@ httpromise('https://api.coinmarketcap.com/v1/ticker/')
     data.forEach(function(c){
       table = loadTable(c);
     });
+    table.push(
+      ['', '', '', '', colors.bold('Total'), colors.bold('$'+HoldingValue.total())]
+    );
     return table;
   })
   .then(function(t){
-    console.log(t.toString());
+    // only show holdings total
+    if (program.total){
+        console.log('Total Holdings: '+colors.bold.cyan('$'+HoldingValue.total())+' USD');
+    }else{
+        console.log(t.toString());
+    }
   });
