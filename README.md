@@ -111,4 +111,4 @@ ethreal -h
 
 ### Supported Cryptocurrencies
 
-EthReal is currently able to display the current market value in USD for the [coinmarketcap.com](https://coinmarketcap.com) top 100:
+EthReal is currently able to display the current market value in USD for the [coincap.io](https://api.coincap.io) top 100:
