@@ -1,79 +1,102 @@
 #!/usr/bin/env node
-var colors = require('colors');
-var Table = require('cli-table');
-var fs = require('fs');
-var program = require('commander');
+var colors = require("colors");
+var Table = require("cli-table");
+var fs = require("fs");
+var program = require("commander");
 var home = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
 
 program
-  .version('1.2.1')
-  .option('-f, --follow <symbol>', 'Follow a cryptocurrency', 0)
-  .option('-u, --unfollow <symbol>', 'Stop following a cryptocurrency', 0)
-  .option('-c, --color <color>', 'Change color of cryptocurrency', 0)
-  .option('-s, --symbol <symbol>', 'Specify symbol of cryptocurrency to modify', 0)
-  .option('-a, --add <holdings>', 'Specify holdings to add to symbol (-s <symbol> required)', parseFloat)
-  .option('-r, --remove <holdings>', 'Specify holdings to remove from symbol (-s <symbol> required)', parseFloat)
+  .version("1.2.1")
+  .option("-f, --follow <symbol>", "Follow a cryptocurrency", 0)
+  .option("-u, --unfollow <symbol>", "Stop following a cryptocurrency", 0)
+  .option("-c, --color <color>", "Change color of cryptocurrency", 0)
+  .option(
+    "-s, --symbol <symbol>",
+    "Specify symbol of cryptocurrency to modify",
+    0
+  )
+  .option(
+    "-a, --add <holdings>",
+    "Specify holdings to add to symbol (-s <symbol> required)",
+    parseFloat
+  )
+  .option(
+    "-r, --remove <holdings>",
+    "Specify holdings to remove from symbol (-s <symbol> required)",
+    parseFloat
+  )
+  .option(
+    "-i, --set <holdings>",
+    "Specify holdings set for symbol (-s <symbol> required)",
+    parseFloat
+  )
   .parse(process.argv);
 
-const httpromise = function(url) {
+const httpromise = function (url) {
   // return new pending promise
   return new Promise((resolve, reject) => {
     // select http or https module, depending on reqested url
-    const lib = url.startsWith('https') ? require('https') : require('http');
+    const lib = url.startsWith("https") ? require("https") : require("http");
     const request = lib.get(url, (response) => {
       // handle http errors
       if (response.statusCode < 200 || response.statusCode > 299) {
-         reject(new Error('Failed to load page, status code: ' + response.statusCode));
-       }
+        reject(
+          new Error("Failed to load page, status code: " + response.statusCode)
+        );
+      }
       // temporary data holder
       const body = [];
       // on every content chunk, push it to the data array
-      response.on('data', (chunk) => body.push(chunk));
+      response.on("data", (chunk) => body.push(chunk));
       // we are done, resolve promise with those joined chunks
-      response.on('end', () => resolve(body.join('')));
+      response.on("end", () => resolve(body.join("")));
     });
     // handle connection errors of the request
-    request.on('error', (err) => reject(err))
-    })
+    request.on("error", (err) => reject(err));
+  });
 };
 
-const loadConfig = function(){
-  return JSON.parse(fs.readFileSync(home+'/.ethreal', 'utf8'));
-}
+const loadConfig = function () {
+  return JSON.parse(fs.readFileSync(home + "/.ethreal", "utf8"));
+};
 
-const writeToConfig = function(config) {
-  fs.writeFileSync(home+'/.ethreal', JSON.stringify(config, null, 4), { flag: 'w' }, function (err) {
-    if (err) throw err;
-  });
-}
+const writeToConfig = function (config) {
+  fs.writeFileSync(
+    home + "/.ethreal",
+    JSON.stringify(config, null, 4),
+    { flag: "w" },
+    function (err) {
+      if (err) throw err;
+    }
+  );
+};
 
-const symbolInConfig = function(symbol) {
+const symbolInConfig = function (symbol) {
   var data = loadConfig();
-  var exists = data.crypto.filter(function(c){
+  var exists = data.crypto.filter(function (c) {
     return c.symbol == symbol;
   }).length;
   return exists;
-}
+};
 
 // unfollow a crypto
-if (program.unfollow){
+if (program.unfollow) {
   var data = loadConfig();
   var symbol = program.unfollow.toUpperCase();
 
-  var newCrypto = data.crypto.filter(function(c){
+  var newCrypto = data.crypto.filter(function (c) {
     return c.symbol != symbol;
   });
 
   data.crypto = newCrypto;
   writeToConfig(data);
 
-  console.log(colors.red("No longer following "+symbol));
+  console.log(colors.red("No longer following " + symbol));
 }
 
 // follow a crypto
-if (program.follow){
-
-/*  httpromise('https://api.coinmarketcap.com/v1/ticker/')
+if (program.follow) {
+  /*  httpromise('https://api.coinmarketcap.com/v1/ticker/')
     .then(function(data){
       data = JSON.parse(data);
       var list = data.map(function(c) {
@@ -81,186 +104,227 @@ if (program.follow){
       });
       return list;
     }).then(function(data){*/
-      var symbol = program.follow.toUpperCase();
-      var color = (program.color)? program.color : 'red';
+  var symbol = program.follow.toUpperCase();
+  var color = program.color ? program.color : "red";
 
-/*    if(data.indexOf(symbol) < 0 ){
+  /*    if(data.indexOf(symbol) < 0 ){
         console.log(colors.red('Symbol '+symbol+' not supported.'));
         console.log(colors.cyan('Supported Symbols'));
         console.log(data.sort().join(', '));
         process.exit(1);
       }*/
 
-      if(!symbolInConfig(symbol)){
-        var data = loadConfig();
-        data.crypto.push({'symbol':symbol, 'color': color});
-        writeToConfig(data);
-      }else{
-        console.log("Already following "+symbol);
-      }
-    //})
-
+  if (!symbolInConfig(symbol)) {
+    var data = loadConfig();
+    data.crypto.push({ symbol: symbol, color: color });
+    writeToConfig(data);
+  } else {
+    console.log("Already following " + symbol);
+  }
+  //})
 }
 
-// add to holdings
-if (program.add){
+// set holdings
+if (program.set) {
   if (!program.symbol) {
-    console.log(colors.red('symbol (-s|--symbol <symbol>) must be specified'));
+    console.log(colors.red("symbol (-s|--symbol <symbol>) must be specified"));
     process.exit(1);
   }
 
   var symbol = program.symbol.toUpperCase();
 
-  if(symbolInConfig(symbol)){
+  if (symbolInConfig(symbol)) {
     var data = loadConfig();
-    data.crypto.map(function(c){
-      if(c.symbol == symbol){
-        if(typeof c.holding == 'number'){
-          c.holding += program.add;
-        }else{
-          c.holding = program.add
+    data.crypto.map(function (c) {
+      if (c.symbol == symbol) {
+        if (typeof c.holding == "number") {
+          c.holding = program.set;
+        } else {
+          c.holding = program.set;
         }
       }
     });
     writeToConfig(data);
   }
-  
-  console.log("Added "+program.add+" to "+symbol+" holdings");
+
+  console.log("Set " + symbol + " holdings to " + program.set);
 }
 
-// remove from holdings
-if (program.remove){
+// add to holdings
+if (program.add) {
   if (!program.symbol) {
-    console.log(colors.red('symbol (-s|--symbol <symbol>) must be specified'));
+    console.log(colors.red("symbol (-s|--symbol <symbol>) must be specified"));
     process.exit(1);
   }
 
   var symbol = program.symbol.toUpperCase();
 
-  if(symbolInConfig(symbol)){
+  if (symbolInConfig(symbol)) {
     var data = loadConfig();
-    data.crypto.map(function(c){
-      if(c.symbol == symbol){
+    data.crypto.map(function (c) {
+      if (c.symbol == symbol) {
+        if (typeof c.holding == "number") {
+          c.holding += program.add;
+        } else {
+          c.holding = program.add;
+        }
+      }
+    });
+    writeToConfig(data);
+  }
+
+  console.log("Added " + program.add + " to " + symbol + " holdings");
+}
+
+// remove from holdings
+if (program.remove) {
+  if (!program.symbol) {
+    console.log(colors.red("symbol (-s|--symbol <symbol>) must be specified"));
+    process.exit(1);
+  }
+
+  var symbol = program.symbol.toUpperCase();
+
+  if (symbolInConfig(symbol)) {
+    var data = loadConfig();
+    data.crypto.map(function (c) {
+      if (c.symbol == symbol) {
         c.holding -= program.remove;
       }
     });
     writeToConfig(data);
   }
-  
-  console.log("Removed "+program.remove+" from "+symbol+" holdings");
+
+  console.log("Removed " + program.remove + " from " + symbol + " holdings");
 }
 
 // Update color of crypto record
-if (program.color && program.symbol){
-
+if (program.color && program.symbol) {
   var symbol = program.symbol.toUpperCase();
 
-  if(symbolInConfig(symbol)){
+  if (symbolInConfig(symbol)) {
     var data = loadConfig();
-    data.crypto.map(function(c){
-      if(c.symbol == symbol){
+    data.crypto.map(function (c) {
+      if (c.symbol == symbol) {
         c.color = program.color;
       }
     });
     writeToConfig(data);
   }
-  
-  console.log(colors[program.color](symbol)+" color updated.");
+
+  console.log(colors[program.color](symbol) + " color updated.");
 }
 
-if (!fs.existsSync(home+'/.ethreal')) {
+if (!fs.existsSync(home + "/.ethreal")) {
   var config = {
-    "crypto": [
+    crypto: [
       {
-          "symbol": "BTC"
-        , "color": "magenta"
+        symbol: "BTC",
+        color: "magenta",
       },
       {
-          "symbol": "BCH"
-        , "color": "green"
+        symbol: "BCH",
+        color: "green",
       },
       {
-          "symbol": "ETH"
-        , "color": "cyan"
+        symbol: "ETH",
+        color: "cyan",
       },
       {
-          "symbol": "LTC"
-        , "color": "yellow"
-      }
-    ]
+        symbol: "LTC",
+        color: "yellow",
+      },
+    ],
   };
 
   writeToConfig(config);
 }
 
-var config = JSON.parse(fs.readFileSync(home+'/.ethreal', 'utf8'));
+var config = JSON.parse(fs.readFileSync(home + "/.ethreal", "utf8"));
 
-const loadTable = function(parsed){
+const loadTable = function (parsed) {
+  var change24h =
+    parsed.changePercent24Hr >= 0
+      ? colors.green("⇧" + Number(parsed.changePercent24Hr).toFixed(4))
+      : colors.red("⇩" + Number(parsed.changePercent24Hr).toFixed(4));
 
-  var change24h = (parsed.percent_change_24h >= 0)
-        ? colors.green(' '+parsed.percent_change_24h)
-        : colors.red(parsed.percent_change_24h);
+  // var change7d =
+  //   parsed.percent_change_7d >= 0
+  //     ? colors.green(" " + parsed.percent_change_7d)
+  //     : colors.red(parsed.percent_change_7d);
 
-  var change7d = (parsed.percent_change_7d >= 0)
-        ? colors.green(' '+parsed.percent_change_7d)
-        : colors.red(parsed.percent_change_7d);
-
-
-  var color = config.crypto.filter(function(c){
+  var color = config.crypto.filter(function (c) {
     return c.symbol == parsed.symbol;
   });
 
-  var holding = config.crypto.filter(function(c){
-    return c.hasOwnProperty('holding') && (c.symbol == parsed.symbol);
+  var holding = config.crypto.filter(function (c) {
+    return c.hasOwnProperty("holding") && c.symbol == parsed.symbol;
   });
 
-  var h = (holding.length)? holding[0].holding : 0;
-      h = (h > 0)? h : "-";
+  var h = holding.length ? holding[0].holding : 0;
+  h = h > 0 ? h : "-";
 
-  var v = h*parsed.price_usd;
-      v = (v > 0)? "$"+v.toFixed(2) : "-";
+  var v = h * parsed.priceUsd;
+  v = v > 0 ? "$" + v.toFixed(2) : "-";
 
   var c = color[0].color;
 
-  table.push(
-      [colors[c](parsed.name), colors[c]("$"+parsed.price_usd), change24h, change7d, h, v]
-  );
+  table.push([
+    colors[c](parsed.name),
+    colors[c]("$" + Number(parsed.priceUsd).toFixed(2)),
+    change24h,
+    // change7d,
+    h,
+    v,
+  ]);
 
   return table;
-}
+};
 
-const configSymbols = function() {
-  return config.crypto.map(function(c){
+const configSymbols = function () {
+  return config.crypto.map(function (c) {
     return c.symbol;
   });
-}
+};
 
 var table = new Table({
-  head: ['Crypto', 'USD', '24h', '7d', 'Holding', 'USD'],
-  chars: { 'top': '═' , 'top-mid': '╤' , 'top-left': '╔' , 'top-right': '╗'
-         , 'bottom': '═' , 'bottom-mid': '╧' , 'bottom-left': '╚' , 'bottom-right': '╝'
-         , 'left': '║' , 'left-mid': '╟' , 'mid': '─' , 'mid-mid': '┼'
-         , 'right': '║' , 'right-mid': '╢' , 'middle': '│' }
+  head: ["Crypto", "USD", "24h", "Holding", "USD"],
+  chars: {
+    top: "═",
+    "top-mid": "╤",
+    "top-left": "╔",
+    "top-right": "╗",
+    bottom: "═",
+    "bottom-mid": "╧",
+    "bottom-left": "╚",
+    "bottom-right": "╝",
+    left: "║",
+    "left-mid": "╟",
+    mid: "─",
+    "mid-mid": "┼",
+    right: "║",
+    "right-mid": "╢",
+    middle: "│",
+  },
 });
 
-httpromise('https://api.coinmarketcap.com/v1/ticker/')
-  .then(function(data){
-    data = JSON.parse(data);
+httpromise("https://api.coincap.io/v2/assets/")
+  .then(function (data) {
+    data = JSON.parse(data).data;
     symbols = configSymbols();
-
-    var sort = data.filter(function(c) {
+    var sort = data.filter(function (c) {
       return symbols.indexOf(c.symbol) >= 0;
     });
 
     return sort;
   })
-  .then(function(data){
+  .then(function (data) {
     var table = null;
-    data.forEach(function(c){
+    data.forEach(function (c) {
       table = loadTable(c);
     });
     return table;
   })
-  .then(function(t){
+  .then(function (t) {
     console.log(t.toString());
   });
